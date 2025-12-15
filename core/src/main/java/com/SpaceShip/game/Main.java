@@ -7,6 +7,14 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
+
+import java.sql.Time;
+import java.util.Iterator;
+
 
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -16,6 +24,8 @@ public class Main extends ApplicationAdapter {
     private Sprite nave, enemy, missile;
     private float posX, posY, velocity, xMissile, yMissile;
     private boolean attack;
+    private Array<Rectangle> enemies;
+    private long lastEnemyTime;
 
 
 
@@ -34,6 +44,11 @@ public class Main extends ApplicationAdapter {
         yMissile = posY;
         xMissile = posX;
         attack = false;
+
+        tEnemy = new Texture("enemy.png");
+        enemies = new Array<Rectangle>();
+
+        lastEnemyTime = 0;
     }
 
     @Override
@@ -41,12 +56,16 @@ public class Main extends ApplicationAdapter {
 
         this.moveNave();
         this.moveMissible();
+        this.moveEnemies();
 
         ScreenUtils.clear(1, 0, 0, 1);
         batch.begin();
         batch.draw(image, 0, 0);
         batch.draw(missile, xMissile + nave.getWidth() / 2, yMissile + nave.getHeight() / 2 - 12);
         batch.draw(nave, posX, posY);
+        for (Rectangle enemy : enemies) {
+            batch.draw(tEnemy, enemy.x, enemy.y);
+        }
         batch.end();
     }
 
@@ -95,6 +114,26 @@ public class Main extends ApplicationAdapter {
         } else {
             xMissile = posX;
             yMissile = posY;
+        }
+    }
+
+    private void spawnEnemies() {
+        Rectangle enemy = new Rectangle(Gdx.graphics.getWidth(), MathUtils.random(0, Gdx.graphics.getHeight() - tEnemy.getHeight()), tEnemy.getWidth(), tEnemy.getHeight());
+        enemies.add(enemy);
+        lastEnemyTime = TimeUtils.nanoTime();
+    }
+
+    private void moveEnemies() {
+        if (TimeUtils.nanoTime() - lastEnemyTime > 1000000000) {
+            this.spawnEnemies();
+        }
+
+        for (Iterator<Rectangle> iter = enemies.iterator(); iter.hasNext();) {
+            Rectangle enemy = iter.next();
+            enemy.x -= 200 * Gdx.graphics.getDeltaTime();
+            if (enemy.x + tEnemy.getHeight() < 0 ) {
+                iter.remove();
+            }
         }
     }
 }
