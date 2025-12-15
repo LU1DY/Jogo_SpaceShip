@@ -15,7 +15,7 @@ public class Main extends ApplicationAdapter {
     private Texture image, tNave, tEnemy, tMissile;
     private Sprite nave, enemy, missile;
     private float posX, posY, velocity, xMissile, yMissile;
-
+    private boolean attack;
 
 
 
@@ -33,6 +33,7 @@ public class Main extends ApplicationAdapter {
         missile = new Sprite(tMissile);
         yMissile = posY;
         xMissile = posX;
+        attack = false;
     }
 
     @Override
@@ -80,7 +81,20 @@ public class Main extends ApplicationAdapter {
     }
 
     private void moveMissible() {
-        yMissile = posY;
-        xMissile = posX;
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && !attack) {
+            attack = true;
+            yMissile = posY;
+        }
+        if (attack) {
+            if (xMissile < Gdx.graphics.getWidth()) {
+                xMissile += 40;
+            } else {
+                xMissile = posX;
+                attack = false;
+            }
+        } else {
+            xMissile = posX;
+            yMissile = posY;
+        }
     }
 }
